@@ -3,26 +3,34 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
 import { logout } from "lib/api";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
+import Image from "next/image";
 
 const NavbarLogin = () => {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const { logout } = useAuth();
 
-  const handleLogout = async () => {
-    try {
-      await logout(); // call API
-      //Slogout(null); // reset auth state
-      router.push("/"); // redirect to login
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
+  const handleLogout = () => {
+    logout();             // ⬅️ Clear token & state
+    window.location.href = "/"; // ⬅️ Redirect ke homepage
   };
 
   return (
     <nav className="bg-[#1b2a3d] sticky top-0 z-50 shadow">
-      <div className="max-w-7xl mx-auto px-1 py-4 flex items-center justify-end">
+      <div className="max-w-7xl mx-auto px-1 py-4 flex items-center justify-between">
+        <div className="p-0">
+          <Link href="/" className="flex-shrink-0">
+            <Image
+              src="/logoWeb1.png"
+              alt="Logo PlayPal"
+              width={128}   // misal lebar 128px
+              height={32}   // misal tinggi 32px
+              className="cursor-pointer"
+              priority       // karena ini LCP image, bisa diset priority
+            />
+          </Link>
+        </div>
         {/* Desktop nav */}
         <div className="hidden md:flex items-center space-x-8 text-white">
           <Link href="/games" className="hover:underline">Games</Link>

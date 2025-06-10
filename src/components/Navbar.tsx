@@ -1,14 +1,12 @@
-import { useEffect, useState } from "react";
-import NavbarGuest from "./NavbarGuest";
-import NavbarLogin from "./NavbarLogin";
+import { logout } from "lib/api";
+import { useAuth } from "@/context/AuthContext";
+import NavbarGuest from "@/components/NavbarGuest";
+import NavbarLogin from "@/components/NavbarLogin";
 
 export default function Navbar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isAuthenticated, loading } = useAuth();
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token); // true jika token ada
-  }, []);
+  if (loading) return null; // atau spinner
 
-  return isLoggedIn ? <NavbarLogin /> : <NavbarGuest />;
+  return isAuthenticated ? <NavbarLogin /> : <NavbarGuest />;
 }

@@ -15,8 +15,9 @@
     "incremental": true,
     "baseUrl": ".", // ✅ required
     "paths": {
-      "@/components/*": ["components/*"],
-      "@/interfaces/*": ["interfaces/*"]
+      // "@/components/*": ["components/*"],
+      // "@/interfaces/*": ["interfaces/*"]
+      "@/*": ["src/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/Login.tsxx"],

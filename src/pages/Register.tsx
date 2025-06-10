@@ -42,7 +42,6 @@ export default function RegisterForm() {
     });
 
     const data = await res.json();
-    console.log("API response:", data);
 
     if (data.errors) {
       console.log("Validation errors:", data.errors);

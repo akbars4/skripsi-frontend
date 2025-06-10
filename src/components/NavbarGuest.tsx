@@ -2,23 +2,33 @@ import React from 'react'
 import { useState } from "react";
 import Link from "next/link";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import Image from 'next/image';
 
 const NavbarGuest = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <nav className="bg-[#1b2a3d] sticky top-0 z-50 shadow">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-end">
+      <div className="max-w-7xl mx-auto px-1 py-4 flex items-center justify-between">
         {/* Logo */}
-        {/* <div className="bg-gray-300 text-black px-4 py-2">
-          logo
-        </div> */}
+        <div className="p-0">
+          <Link href="/" className="flex-shrink-0">
+            <Image
+              src="/logoWeb1.png"
+              alt="Logo PlayPal"
+              width={128}   // misal lebar 128px
+              height={32}   // misal tinggi 32px
+              className="cursor-pointer"
+              priority       // karena ini LCP image, bisa diset priority
+            />
+          </Link>
+        </div>
 
         {/* Desktop nav */}
         <div className="hidden md:flex space-x-8 text-white">
           <Link href="/games" className="hover:underline">Games</Link>
-          <Link href="/Login" className="hover:underline">Login</Link>
-          <Link href="/Register" className="hover:underline">Register</Link>
+          <Link href="/login" className="hover:underline">Login</Link>
+          <Link href="/register" className="hover:underline">Register</Link>
           <Link href="/search" className="hover:underline">Search</Link>
         </div>
 

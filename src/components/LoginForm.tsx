@@ -1,51 +1,27 @@
 import { useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/router";
 
 export default function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
-
+  const { login } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-
-  try {
-    const res = await fetch("http://127.0.0.1:8000/api/login", {
-      method: "POST",
-      credentials: 'include',
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({
-        username,
-        password,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-  if (data.message === "Invalid credentials") {
-    setError("Akun tidak ditemukan. Klik di bawah untuk daftar akun baru.");
-  } else {
-    setError(data.message || "Login failed");
-  }
-  return;
-}
-
-    // ✅ Simpan token di localStorage
-    localStorage.setItem("token", data.token);
-
-    // ✅ Redirect setelah login sukses
-    window.location.href = "/"; // atau router.push('/')
-  } catch (error: any) {
-    alert(error.message);
-  }
-};
-
+    e.preventDefault();
+    try {
+      await login(username, password); // ⬅️ cukup panggil context
+      router.push("/");
+    } catch (error: any) {
+      setError(error.message);
+    }
+    
+  };
+ 
   return (
     <div className="min-h-screen bg-[#11161D] flex items-center justify-center">
       <form
@@ -57,16 +33,16 @@ export default function LoginForm() {
         </h2>
 
         {error && (
-    <div className="bg-red-200 text-red-800 p-3 rounded mb-4 text-sm">
-      <p>{error}</p>
-      <Link
-        href="/register"
-        className="text-blue-600 underline hover:text-blue-800 mt-1 inline-block"
-      >
-        Register here
-      </Link>
-    </div>
-  )}
+          <div className="bg-red-200 text-red-800 p-3 rounded mb-4 text-sm">
+            <p>{error}</p>
+            <Link
+              href="/register"
+              className="text-blue-600 underline hover:text-blue-800 mt-1 inline-block"
+            >
+              Register here
+            </Link>
+          </div>
+        )}
 
         <input
           type="text"

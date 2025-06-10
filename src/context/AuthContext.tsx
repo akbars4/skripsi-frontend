@@ -1,9 +1,10 @@
+import { loginUser } from "lib/api";
 import { createContext, useContext, useEffect, useState } from "react";
 
 interface AuthContextType {
   isAuthenticated: boolean;
   token: string | null;
-  login: (token: string) => void;
+  login: (username: string, password: string) => Promise<void>;
   logout: () => void;
   loading: boolean;
 }
@@ -12,22 +13,25 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true); 
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("token");
-    if (savedToken) setToken(savedToken);
-  }, []);
+  const savedToken = sessionStorage.getItem("token");
+  if (savedToken) setToken(savedToken);
+  setLoading(false);
+}, []);
 
-  const login = (newToken: string) => {
-    localStorage.setItem("token", newToken);
-    setToken(newToken);
-  };
+const login = async (username: string, password: string) => {
+  const newToken = await loginUser(username, password);
+  sessionStorage.setItem("token", newToken);
+  setToken(newToken);
+};
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
-  };
+const logout = () => {
+  sessionStorage.removeItem("token");
+  setToken(null);
+};
+
 
   return (
     <AuthContext.Provider value={{ isAuthenticated: !!token, token, login, logout, loading }}>

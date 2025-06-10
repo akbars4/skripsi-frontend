@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import GameList from "./GameList";
-import { Game } from "../interfaces/Game";
+import GameList from "@/components/GameList";
+import { Game } from "@/interfaces/Game";
 import { fetchNewRelease } from "lib/api";
 
 export default function Home() {
@@ -14,7 +14,6 @@ export default function Home() {
       const data = await fetchNewRelease(); // 🎉 pakai dari lib/api.ts
       setGames(data);
     } catch (err: any) {
-      console.error("Fetch error:", err.message);
       setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
