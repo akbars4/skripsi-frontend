@@ -1,10 +1,14 @@
 //  --------------------- api login user -------------------------------
 // lib/api.ts
+export interface LoginResponse{
+  token: string;
+  username: string;
+}
 
 export async function loginUser(
   username: string,
   password: string
-): Promise<string> {
+): Promise<LoginResponse> {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
 
@@ -27,7 +31,10 @@ export async function loginUser(
   const token = data.data?.token;
   if (!token) throw new Error("Token not found");
 
-  return token;
+  return{
+    token: data.data?.token,
+    username: data.data.user.username
+  };
 }
 
 // ---------------------------- api Games page ---------------------------------
@@ -507,3 +514,62 @@ export async function createForumThread(
   return json.data as ForumThread;
 }
 
+
+// ---------------------- api List Page -------------------------------
+export interface GameLocal {
+  id: number;
+  igdb_id: number;
+  slug: string;
+  name: string;
+  cover_url: string;
+  // …any other fields…
+}
+
+export interface UserList {
+  id: number;
+  title: string;
+  description: string;
+  games: GameLocal[];
+  username: string;
+}
+
+export interface CreateListBody {
+  name: string;
+  description: string;
+  data: {id: number}[];
+}
+
+// fetch all of the user’s lists
+export async function fetchUserLists(username: string, token: string): Promise<UserList[]> {
+  const res = await fetch(`${baseUrl}/api/user/${encodeURIComponent(username)}/lists`, {
+    headers: {
+      "X-API-KEY": apiKey || "",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error("Failed to load lists");
+  const json = await res.json();
+  return json.data as UserList[];
+}
+
+// create a new list
+export async function createUserList(
+  body: CreateListBody,
+  token: string
+): Promise<UserList> {
+  const res = await fetch(`${baseUrl}/api/lists/custom`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-API-KEY": apiKey || "",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.message || "Failed to create list");
+  }
+  const json = await res.json();
+  return json.data as UserList;
+}

@@ -1,7 +1,12 @@
-import { loginUser } from "lib/api";
+import { LoginResponse, loginUser } from "lib/api";
 import { createContext, useContext, useEffect, useState } from "react";
+import { json } from "stream/consumers";
 
+interface UserProfile {
+  username: string;
+}
 interface AuthContextType {
+  user: UserProfile | null;
   isAuthenticated: boolean;
   token: string | null;
   login: (username: string, password: string) => Promise<void>;
@@ -9,32 +14,53 @@ interface AuthContextType {
   loading: boolean;
 }
 
+
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
   const savedToken = sessionStorage.getItem("token");
-  if (savedToken) setToken(savedToken);
-  setLoading(false);
+  const u = sessionStorage.getItem("user");
+
+  if (savedToken) {
+    setToken(savedToken);
+  }
+
+  try {
+    if (u) {
+      setUser(JSON.parse(u));
+    }
+  } catch (e) {
+    console.error("Error parsing stored user:", e);
+  } finally {
+    setLoading(false);
+  }
 }, []);
 
-const login = async (username: string, password: string) => {
-  const newToken = await loginUser(username, password);
+
+const login = async (uss: string, pass: string) => {
+  const { token: newToken, username: returnedUsername }: LoginResponse =
+      await loginUser(uss, pass);
   sessionStorage.setItem("token", newToken);
-  setToken(newToken);
+  sessionStorage.setItem("user", JSON.stringify({username: returnedUsername}))
+  setToken(token);
+  setUser({username: returnedUsername})
 };
 
 const logout = () => {
   sessionStorage.removeItem("token");
   setToken(null);
+  setUser(null);
 };
 
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated: !!token, token, login, logout, loading }}>
+    <AuthContext.Provider value={{ isAuthenticated: !!token, token, login, logout, loading, user }}>
       {children}
     </AuthContext.Provider>
   );

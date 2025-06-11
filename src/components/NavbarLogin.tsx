@@ -36,7 +36,7 @@ const NavbarLogin = () => {
           <Link href="/games" className="hover:underline">Games</Link>
           <Link href="/forum" className="hover:underline">Forum</Link>
           <Link href="/search" className="hover:underline">Search</Link>
-          <Link href="/list" className="hover:underline">List</Link>
+          <Link href="/lists" className="hover:underline">List</Link>
           <Link href="/activity" className="hover:underline">Activity</Link>
           <Link href="/profile" className="hover:underline">Profile</Link>
 
@@ -65,7 +65,7 @@ const NavbarLogin = () => {
           <Link href="/games" className="block hover:underline" onClick={() => setIsOpen(false)}>Games</Link>
           <Link href="/forum" className="block hover:underline" onClick={() => setIsOpen(false)}>Forum</Link>
           <Link href="/search" className="block hover:underline" onClick={() => setIsOpen(false)}>Search</Link>
-          <Link href="/list" className="block hover:underline" onClick={() => setIsOpen(false)}>List</Link>
+          <Link href="/lists" className="block hover:underline" onClick={() => setIsOpen(false)}>List</Link>
           <Link href="/activity" className="block hover:underline" onClick={() => setIsOpen(false)}>Activity</Link>
           <Link href="/profile" className="block hover:underline" onClick={() => setIsOpen(false)}>Profile</Link>
 
