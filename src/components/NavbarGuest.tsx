@@ -48,8 +48,8 @@ const NavbarGuest = () => {
       {isOpen && (
         <div className="md:hidden bg-[#1b2a3d] px-6 pb-4 space-y-2 text-white">
           <Link href="/games" className="block hover:underline" onClick={() => setIsOpen(false)}>Games</Link>
-          <Link href="/Login" className="block hover:underline" onClick={() => setIsOpen(false)}>Login</Link>
-          <Link href="/Register" className="block hover:underline" onClick={() => setIsOpen(false)}>Register</Link>
+          <Link href="/login" className="block hover:underline" onClick={() => setIsOpen(false)}>Login</Link>
+          <Link href="/register" className="block hover:underline" onClick={() => setIsOpen(false)}>Register</Link>
           <Link href="/search" className="block hover:underline" onClick={() => setIsOpen(false)}>Search</Link>
         </div>
       )}

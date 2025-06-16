@@ -2,8 +2,10 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/context/AuthContext";
-import { fetchUserLists, UserList } from "lib/api";
+// import { fetchUserLists, UserList } from "lib/api";
 import CreateListModal from "@/components/CreateListModal";
+import { UserList } from "@/interfaces/api/ListsOfApiInterface";
+import { fetchUserLists } from "lib/api";
 
 export default function MyListsPage() {
   const { isAuthenticated, token, user } = useAuth();
@@ -24,14 +26,7 @@ export default function MyListsPage() {
         setLoading(false);
       });
   }, [isAuthenticated, token, user?.username]);
-  if (!isAuthenticated) {
-    return (
-      <div>
-        <Navbar />
-        <p className="p-6">Please <a href="/login">login</a> to view your lists.</p>
-      </div>
-    );
-  }
+ 
 
   return (
     <>
@@ -52,13 +47,13 @@ export default function MyListsPage() {
           lists.map((lst) => (
             <section key={lst.id} className="mb-8">
               <h2 className="text-xl font-semibold">{lst.title}</h2>
-              <p className="text-gray-400 mb-2">{lst.description}</p>
+              {/* <p className="text-gray-400 mb-2">{lst.title}</p> */}
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
-                {lst.games.map((g) => (
-                  <div key={g.id} className="aspect-[4/5]">
+                {lst.items?.map((items:any) => (
+                  <div key={items.id} className="aspect-[4/5]">
                     <img
-                      src={g.cover_url}
-                      alt={g.name}
+                      src={items.cover_url}
+                      alt={items.name}
                       className="w-full h-full object-cover rounded-lg"
                     />
                   </div>

@@ -8,8 +8,9 @@ import {
   TransitionChild
 } from "@headlessui/react";
 import { useAuth } from "@/context/AuthContext";
-import { createDiaryEntry, CreateDiaryBody } from "lib/api";
 import { useRouter } from "next/router";
+import { CreateDiaryBody } from "@/interfaces/api/ListsOfApiInterface";
+import { createDiaryEntry } from "lib/api";
 
 interface AddReviewModalProps {
   gameId: number;

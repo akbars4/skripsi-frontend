@@ -1,6 +1,7 @@
-import { LoginResponse, loginUser } from "lib/api";
+// import { LoginResponse, loginUser } from "lib/api";
+import { LoginResponse } from "@/interfaces/api/ListsOfApiInterface";
+import { loginUser } from "lib/api";
 import { createContext, useContext, useEffect, useState } from "react";
-import { json } from "stream/consumers";
 
 interface UserProfile {
   username: string;
@@ -43,17 +44,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 }, []);
 
 
-const login = async (uss: string, pass: string) => {
-  const { token: newToken, username: returnedUsername }: LoginResponse =
-      await loginUser(uss, pass);
-  sessionStorage.setItem("token", newToken);
-  sessionStorage.setItem("user", JSON.stringify({username: returnedUsername}))
-  setToken(token);
-  setUser({username: returnedUsername})
-};
+const login = async (username: string, password: string) => {
+    setLoading(true);
+    try {
+      const { token: newToken, username: returnedUsername }: LoginResponse =
+        await loginUser(username, password);
+
+      // persist
+      sessionStorage.setItem("token", newToken);
+      sessionStorage.setItem("user", JSON.stringify({ username: returnedUsername }));
+
+      // update state
+      setToken(newToken);
+      setUser({ username: returnedUsername });
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
 const logout = () => {
   sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
   setToken(null);
   setUser(null);
 };

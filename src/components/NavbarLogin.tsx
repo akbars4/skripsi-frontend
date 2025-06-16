@@ -10,6 +10,8 @@ const NavbarLogin = () => {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
   const { logout } = useAuth();
+  const {user} = useAuth();
+  if (!user) return null
 
   const handleLogout = () => {
     logout();             // ⬅️ Clear token & state

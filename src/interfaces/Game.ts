@@ -10,7 +10,7 @@ export interface Game {
     // Add any fields your Laravel API returns
   }
 
-  export interface GameLocal extends Game{
+  export interface  GameLocal extends Game{
     id: number                // ← this is the field your forum create needs
   summary: string
   cover_url: string

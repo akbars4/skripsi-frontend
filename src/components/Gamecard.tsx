@@ -1,3 +1,4 @@
+import { Game } from "@/interfaces/Game";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -6,9 +7,10 @@ export interface GameCardProps {
   name: string;
   cover: string;
   href: string;
+  game:Game;
 }
 
-export default function GameCard({ slug, name, cover, href }: GameCardProps) {
+export default function GameCard({ slug, name, cover, href, game }: GameCardProps) {
   if (!href) {
     console.error("GameCard: missing href", GameCard);
     return null;

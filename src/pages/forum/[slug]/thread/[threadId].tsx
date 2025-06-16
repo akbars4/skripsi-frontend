@@ -10,9 +10,10 @@ import {
   fetchForumThreadsBySlug,
   fetchRepliesByThreadId,
   createForumReply,
-  ForumThread,
-  Reply,
+  // ForumThread,
+  // Reply,
 } from "lib/api";
+import { ForumThread, Reply } from "@/interfaces/api/ListsOfApiInterface";
 
 interface Game {
   slug: string;

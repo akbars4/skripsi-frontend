@@ -24,7 +24,7 @@ export default function RegisterForm() {
   }
 
   try {
-    const res = await fetch("http://127.0.0.1:8000/api/register", {
+    const res = await fetch("https://skripsi-backend-production-7fd4.up.railway.app/api/register", {
       method: "POST",
       credentials: 'include',
       headers: {

@@ -1,17 +1,15 @@
 //  --------------------- api login user -------------------------------
 // lib/api.ts
-export interface LoginResponse{
-  token: string;
-  username: string;
-}
+
+import { ActivityDetail, CreateDiaryBody, CreateListBody, CreateThreadBody, DiaryDetail, DiaryEntry, FetchForumThreadsBySlugOpts, FollowerUser, FollowingUser, ForumThread, LoginResponse, ProfileResponse, Reply, UserList } from "@/interfaces/api/ListsOfApiInterface";
+import { Game } from "@/interfaces/Game";
+
+
 
 export async function loginUser(
   username: string,
   password: string
 ): Promise<LoginResponse> {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  const apiKey = process.env.NEXT_PUBLIC_API_KEY;
-
   const res = await fetch(`${baseUrl}/api/login`, {
     method: "POST",
     headers: {
@@ -49,8 +47,8 @@ export async function fetchGames({
   sortBy?: string;
   sortDirection?: string;
 }) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  const apiKey = process.env.NEXT_PUBLIC_API_KEY;
+  // const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  // const apiKey = process.env.NEXT_PUBLIC_API_KEY;
 
   const url = `${baseUrl}/api/games?page=${page}&per_page=${perPage}&sort_by=${sortBy}&sort_direction=${sortDirection}`;
 
@@ -123,8 +121,8 @@ export async function fetchGamesPages({
   sortBy?: string;
   sortDirection?: string;
 }) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  const apiKey = process.env.NEXT_PUBLIC_API_KEY;
+  // const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  // const apiKey = process.env.NEXT_PUBLIC_API_KEY;
 
   const res = await fetch(
     `${baseUrl}/api/games?page=${page}&per_page=${perPage}&sort_by=${sortBy}&sort_direction=${sortDirection}`,
@@ -223,15 +221,7 @@ export async function addToFavorites(igdb_id: number, token: string) {
 
 // ---------------------------- api button add to review --------------------
 // ([slug]/index.tsx)
-export interface CreateDiaryBody {
-  game_id: number;
-  platform: string; // e.g. "PC", "Playstation5", etc.
-  status: "completed" | "in-progress" | "dropped";
-  rating: number; // 1–5
-  review: string;
-  played_at: string; // ISO date, e.g. "2024-04-15"
-  liked: boolean;
-}
+
 
 export async function createDiaryEntry(body: CreateDiaryBody, token: string) {
   const res = await fetch(
@@ -308,30 +298,12 @@ export async function getGameReviews(slug: string, page: number) {
 /**
  * A single forum thread as returned by GET /api/forum/games/{slug}
  */
-export interface ForumThread {
-  id: number;
-  title: string;
-  author: string;
-  content: string;
-  replies_count: number;
-  user: {
-    id: number;
-    username: string;
-    profile_picture_url: string;
-  };
-  // add any other fields your backend returns
-}
+
 
 /**
  * Options for fetching a game’s forum threads
  */
-export interface FetchForumThreadsBySlugOpts {
-  slug: string;
-  page?: number;
-  per_page?: number;
-  sort_by?: string;
-  sort_direction?: string;
-}
+
 
 /**
  * Fetch a paginated list of forum threads for a given game slug.
@@ -377,9 +349,7 @@ export async function fetchForumThreadsBySlug({
 // ------------------------------ api reply forum ------------------------------------
 
 // src/lib/api.ts (add near the bottom)
-export interface NewReplyBody {
-  content: string;
-}
+
 
 // export interface CreatedReply {
 //   id: number;
@@ -430,16 +400,7 @@ export async function createForumReply(
 // --------- show replies ---------
 // src/lib/api.ts
 
-export interface Reply {
-  id: number;
-  content: string;
-  created_at: string;
-  user: {
-    id: number;
-    username: string;
-    profile_picture_url: string;
-  };
-}
+
 
 export interface forumThreadDetail extends ForumThread{
     replies: Reply[];
@@ -472,22 +433,9 @@ export async function fetchRepliesByThreadId(
 // ---------------------- api create forum --------------------------
 
 // src/lib/api.ts
-export interface CreateThreadBody {
-  title: string;
-  content: string;
-}
 
-export interface ForumThread { 
-  id: number;
-  title: string;
-  content: string;
-  user_id: number;
-  game_local_id: number;
-  created_at: string;
-  updated_at: string;
-  likes_count: number;
-  replies_count: number;
-}
+
+
 
 // call this when you POST a new thread
 export async function createForumThread(
@@ -516,28 +464,7 @@ export async function createForumThread(
 
 
 // ---------------------- api List Page -------------------------------
-export interface GameLocal {
-  id: number;
-  igdb_id: number;
-  slug: string;
-  name: string;
-  cover_url: string;
-  // …any other fields…
-}
 
-export interface UserList {
-  id: number;
-  title: string;
-  description: string;
-  games: GameLocal[];
-  username: string;
-}
-
-export interface CreateListBody {
-  name: string;
-  description: string;
-  data: {id: number}[];
-}
 
 // fetch all of the user’s lists
 export async function fetchUserLists(username: string, token: string): Promise<UserList[]> {
@@ -557,6 +484,7 @@ export async function createUserList(
   body: CreateListBody,
   token: string
 ): Promise<UserList> {
+  console.log("body to send", body)
   const res = await fetch(`${baseUrl}/api/lists/custom`, {
     method: "POST",
     headers: {
@@ -572,4 +500,222 @@ export async function createUserList(
   }
   const json = await res.json();
   return json.data as UserList;
+}
+
+// ----------------------- api buat profile page -----------------------
+
+
+export async function fetchUserProfile(
+  username: string,
+  token: string
+): Promise<ProfileResponse> {
+  const res = await fetch(
+    `${baseUrl}/api/user/${encodeURIComponent(username)}`,
+    {
+      headers: {
+        "X-API-KEY": apiKey || "",
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "include",
+    }
+  )
+  if (!res.ok) throw new Error("Failed to fetch user profile")
+  const json = await res.json()
+  return json.data as ProfileResponse
+}
+
+export async function fetchUserFollowing(
+  byUsername: string,
+  token: string
+): Promise<{ id: number; username: string }[]> {
+  const res = await fetch(
+    `${baseUrl}/api/user/${encodeURIComponent(byUsername)}/following`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "X-API-KEY": apiKey || "",
+      },
+      credentials: "include",
+    }
+  )
+  if (!res.ok) throw new Error("Failed to load following list")
+  const json = await res.json()
+  return json.data
+}
+
+export async function followUser(
+  targetUserId: number,
+  token: string
+): Promise<void> {
+  const res = await fetch(`${baseUrl}/api/user/follow/${targetUserId}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "X-API-KEY": apiKey || "",
+    },
+    credentials: "include",
+  })
+  if (!res.ok) throw new Error("Failed to follow user")
+}
+
+export async function unfollowUser(
+  targetUserId: number,
+  token: string
+): Promise<void> {
+  const res = await fetch(`${baseUrl}/api/user/unfollow/${targetUserId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "X-API-KEY": apiKey || "",
+    },
+    credentials: "include",
+  })
+  if (!res.ok) throw new Error("Failed to unfollow user")
+}
+
+// ===== edit profile ====
+// lib/api.ts
+// … import baseUrl, apiKey, dll …
+
+/**
+ * Update user profile (multipart/form-data)
+ */
+export async function updateUserProfile(
+  formData: FormData,
+  token: string
+): Promise<ProfileResponse> {
+  const res = await fetch(`${baseUrl}/api/user/update`, {
+    method: "POST",               // atau sesuai spec: PUT/PATCH
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "X-API-KEY": apiKey || "",
+      // NOTE: Jangan set Content-Type: browser akan otomatis atur multipart boundary
+    },
+    body: formData,
+    credentials: "include",
+  })
+  if (!res.ok) {
+    const err = await res.text()
+    throw new Error("Update failed: " + err)
+  }
+  const json = await res.json()
+  return json.data as ProfileResponse
+}
+
+// ======== get follower user =========
+export async function fetchUserFollower(
+  username: string,
+  token: string
+): Promise<FollowingUser[]> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/${encodeURIComponent(
+      username
+    )}/following`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "X-API-KEY": process.env.NEXT_PUBLIC_API_KEY!,
+      },
+      credentials: "include",
+    }
+  )
+  if (!res.ok) {
+    throw new Error("Failed to fetch follower list")
+  }
+  const json = await res.json()
+  return json.data as FollowerUser[]
+}
+
+// ====== api search =========
+export type ApiResponse<T> = {
+  code: number;
+  status: string;
+  message: string;
+  data: T;
+};
+
+export async function searchGames(query: string): Promise<ApiResponse<Game[]>> {
+  const res = await fetch(
+    `${baseUrl}/api/games/search?query=${encodeURIComponent(query)}`,
+    {
+      headers: {
+        "X-API-KEY": apiKey || "",
+      },
+    }
+  );
+  if (!res.ok) throw new Error('Gagal mengambil data game');
+  return res.json();
+}
+
+export async function searchUsers(query: string): Promise<ApiResponse<ProfileResponse[]>> {
+  const res = await fetch(
+    `${baseUrl}/api/user/search?query=${encodeURIComponent(query)}`,
+    {
+      headers: {
+        "X-API-KEY": apiKey || "",
+      },
+    }
+  );
+  if (!res.ok) throw new Error('Gagal mengambil data user');
+  return res.json();
+}
+
+export async function searchForums(query: string): Promise<ApiResponse<ForumThread[]>> {
+  const res = await fetch(
+    `${baseUrl}/api/games/search?query=${encodeURIComponent(query)}`,
+    {
+      headers: {
+        "X-API-KEY": apiKey || "",
+      },
+    }
+  );
+  if (!res.ok) throw new Error('Gagal mengambil data forum');
+  return res.json();
+}
+
+// ============= fetch api activity ===================
+export async function fetchDiaryList(): Promise<ApiResponse<DiaryEntry[]>> {
+  const res = await fetch(`${baseUrl}/api/diary`, {
+    headers: {
+      "X-API-KEY": apiKey || "",
+      "Accept":    "application/json",
+    },
+    credentials: "include",           // kirim cookie kalau pakai session
+  });
+  if (!res.ok) throw new Error(`Gagal ambil diary list (${res.status})`);
+  return res.json();
+}
+
+/**
+ * Fetch detail satu entry berdasarkan ID
+ */
+export async function fetchDiaryDetail(
+  id: number
+): Promise<ApiResponse<DiaryDetail>> {
+  const res = await fetch(`${baseUrl}/api/diary/${id}`, {
+    headers: {
+      "X-API-KEY": apiKey || "",
+      "Accept":    "application/json",
+    },
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error(`Gagal ambil diary detail (${res.status})`);
+  return res.json();
+}
+
+export const fetchActivityDetail = async (
+  id: number,
+  ctx?: { req?: { headers?: { cookie?: string } } }
+): Promise<{ data: ActivityDetail }> => {
+  const headers = {  "X-API-KEY": apiKey || "",
+      "Accept":    "application/json", } as Record<string, string>
+  if (ctx?.req?.headers?.cookie) {
+    headers['cookie'] = ctx.req.headers.cookie
+  }
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/activity/${id}`,
+    { headers }
+  )
+  if (!res.ok) throw new Error(`Status ${res.status}`)
+  return res.json()
 }

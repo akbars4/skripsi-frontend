@@ -2,8 +2,9 @@
 import { Dialog, DialogBackdrop, DialogPanel, DialogTitle, TransitionChild, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { createForumThread, CreateThreadBody } from "lib/api";
+// import { createForumThread, CreateThreadBody } from "lib/api";
 import { useRouter } from "next/router";
+import { createForumThread } from "lib/api";
 
 interface CreateThreadModalProps {
   slug: string;      

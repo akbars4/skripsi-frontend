@@ -7,7 +7,9 @@ import AddToGameListButton from "@/components/AddToGameListButton";
 import AddToFavoritesButton from "@/components/AddToFavouritesButton";
 import AddToWantToPlayButton from "@/components/AddToWantToPlayButton";
 import AddReviewModal from "@/components/AddReviewModal";
-import { CreateDiaryBody, createDiaryEntry, getGameBySlug } from "lib/api";
+import { createDiaryEntry, getGameBySlug } from "lib/api";
+import { CreateDiaryBody } from "@/interfaces/api/ListsOfApiInterface";
+// import { CreateDiaryBody, createDiaryEntry, getGameBySlug } from "lib/api";
 
 interface Game {
   id: number;
@@ -142,17 +144,7 @@ const GameDetailPage: React.FC<DetailProps> = ({ game }) => {
           </div>
         </div>
 
-        <section className="mt-12">
-          <h2 className="text-2xl font-semibold">Reviews From Other Users</h2>
-          <p className="text-gray-400 text-sm mt-1">
-            <a
-              href={`/games/${game.slug}/reviews`}
-              className="text-blue-400 hover:underline"
-            >
-              &gt;&gt; Lihat Semua Review
-            </a>
-          </p>
-        </section>
+        
       </main>
 
       {/* <-- NEW: controlled review modal */}

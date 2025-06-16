@@ -2,9 +2,10 @@
 import { Fragment, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { useAuth } from "@/context/AuthContext";
-import { CreateListBody, createUserList } from "lib/api";
-import { getGameBySlug } from "lib/api";
+// import { CreateListBody, createUserList } from "lib/api";
+import { createUserList, getGameBySlug } from "lib/api";
 import { useRouter } from "next/router";
+import { CreateListBody } from "@/interfaces/api/ListsOfApiInterface";
 
 interface Props {
   isOpen: boolean;
@@ -47,9 +48,9 @@ export default function CreateListModal({ isOpen, onClose, onCreated }: Props) {
     setError(null);
     try {
         const body: CreateListBody = {
-      name:        title,                         // use your modal’s title
+      title,                         // use your modal’s title
       description,                               // description unchanged
-      data: games.map((g) => ({ id: g.id }))  // id array format
+      game_ids: games.map(g=>g.id)  // id array format
     };
       await createUserList(body,
         token!
