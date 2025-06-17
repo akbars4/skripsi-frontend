@@ -28,7 +28,7 @@ export default function Home() {
   if (error) return <p className="text-red-500 p-8">Error: {error}</p>;
 
   return (
-    <div className="bg-[#11161D] min-h-screen p-3">
+    <div className="bg-[#11161D] p-3">
       <h1 className="text-white text-xl mb-6">New Release</h1>
       <GameList games={games} />
     </div>

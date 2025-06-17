@@ -2,7 +2,6 @@
 import { Fragment, useState } from "react";
 import {
   Dialog,
-  // DialogOverlay,
   DialogPanel,
   DialogTitle,
   Transition,
@@ -13,13 +12,13 @@ import { CreateDiaryBody } from "@/interfaces/api/ListsOfApiInterface";
 import { createDiaryEntry } from "lib/api";
 
 interface AddReviewModalProps {
-  gameId: number;       // local game_id to send
+  igdbId: number;
   isOpen: boolean;
   onClose: () => void;
 }
 
 export default function AddReviewModal({
-  gameId,
+  igdbId,
   isOpen,
   onClose,
 }: AddReviewModalProps) {
@@ -54,7 +53,7 @@ export default function AddReviewModal({
     setError(null);
 
     const body: CreateDiaryBody = {
-      game_id:   gameId,   // use local game_id
+      game_id: igdbId,
       platform,
       status,
       rating,
@@ -75,12 +74,8 @@ export default function AddReviewModal({
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog
-        as="div"
-        className="fixed inset-0 z-50 overflow-y-auto"
-        open={isOpen}
-        onClose={onClose}
-      >
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        {/* BACKDROP */}
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-200"
@@ -90,114 +85,114 @@ export default function AddReviewModal({
           leaveFrom="opacity-60"
           leaveTo="opacity-0"
         >
-          <Dialog.Panel className="fixed inset-0 bg-black/60" />
+          <div className="fixed inset-0 bg-black/60" />
         </Transition.Child>
 
-        <div className="min-h-screen px-4 text-center">
-          <span className="inline-block h-screen align-middle" aria-hidden="true">
-            &#8203;
-          </span>
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-200"
-            enterFrom="opacity-0 scale-95"
-            enterTo="opacity-100 scale-100"
-            leave="ease-in duration-150"
-            leaveFrom="opacity-100 scale-100"
-            leaveTo="opacity-0 scale-95"
-          >
-            <DialogPanel className="inline-block w-full max-w-lg p-6 my-8 overflow-hidden text-left align-middle bg-gray-800 rounded-lg shadow-xl">
-              {/* Header */}
-              <div className="flex justify-between items-center border-b border-gray-700 pb-2">
-                <DialogTitle as="h3" className="text-lg font-medium text-white">
-                  Add your review
-                </DialogTitle>
-                <button onClick={onClose} className="text-white text-xl">
-                  ✕
-                </button>
-              </div>
-
-              {/* Body */}
-              <div className="mt-4 space-y-4 text-white">
-                <label className="block">
-                  <span className="text-sm">Finished on</span>
-                  <input
-                    type="date"
-                    value={playedAt}
-                    onChange={(e) => setPlayedAt(e.target.value)}
-                    className="mt-1 block w-full rounded bg-gray-700 px-3 py-2"
-                  />
-                </label>
-
-                <div className="flex gap-4">
-                  <label className="flex-1">
-                    <span className="text-sm">Platform</span>
-                    <select
-                      value={platform}
-                      onChange={(e) => setPlatform(e.target.value)}
-                      className="mt-1 block w-full rounded bg-gray-700 px-3 py-2"
-                    >
-                      { ["PC","PlayStation","Xbox","Switch"].map((p) => (
-                        <option key={p} value={p}>{p}</option>
-                      )) }
-                    </select>
-                  </label>
-                  <label className="flex-1">
-                    <span className="text-sm">Status</span>
-                    <select
-                      value={status}
-                      onChange={(e) => setStatus(e.target.value as any)}
-                      className="mt-1 block w-full rounded bg-gray-700 px-3 py-2"
-                    >
-                      <option value="completed">Completed</option>
-                      <option value="in-progress">In Progress</option>
-                      <option value="dropped">Dropped</option>
-                    </select>
-                  </label>
+        {/* MODAL WRAPPER */}
+        <div className="fixed inset-0 overflow-y-auto">
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-200"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-150"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <DialogPanel className="w-full max-w-lg transform overflow-hidden rounded-lg bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
+                {/* Header */}
+                <div className="flex justify-between items-center border-b border-gray-700 pb-2">
+                  <DialogTitle as="h3" className="text-lg font-medium text-white">
+                    Add your review
+                  </DialogTitle>
+                  <button onClick={onClose} className="text-white text-xl">✕</button>
                 </div>
 
-                <label className="block">
-                  <span className="text-sm">Add a review…</span>
-                  <textarea
-                    value={review}
-                    onChange={(e) => setReview(e.target.value)}
-                    rows={4}
-                    className="mt-1 block w-full rounded bg-gray-700 px-3 py-2 resize-none"
-                  />
-                </label>
+                {/* Form */}
+                <div className="mt-4 space-y-4 text-white">
+                  <label className="block">
+                    <span className="text-sm">Finished on</span>
+                    <input
+                      type="date"
+                      value={playedAt}
+                      onChange={(e) => setPlayedAt(e.target.value)}
+                      className="mt-1 block w-full rounded bg-gray-700 px-3 py-2"
+                    />
+                  </label>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1">
-                    <span className="text-sm mr-2">Rating</span>
-                    { [1,2,3,4,5].map((i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => setRating(i)}
-                        className={`text-2xl ${i <= rating ? "text-yellow-400" : "text-gray-400"}`}
-                      >★</button>
-                    )) }
+                  <div className="flex gap-4">
+                    <label className="flex-1">
+                      <span className="text-sm">Platform</span>
+                      <select
+                        value={platform}
+                        onChange={(e) => setPlatform(e.target.value)}
+                        className="mt-1 block w-full rounded bg-gray-700 px-3 py-2"
+                      >
+                        {["PC", "PlayStation", "Xbox", "Switch"].map((p) => (
+                          <option key={p} value={p}>{p}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="flex-1">
+                      <span className="text-sm">Status</span>
+                      <select
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value as any)}
+                        className="mt-1 block w-full rounded bg-gray-700 px-3 py-2"
+                      >
+                        <option value="completed">Completed</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="dropped">Dropped</option>
+                      </select>
+                    </label>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setLiked(!liked)}
-                    className={`text-2xl ${liked ? "text-red-400" : "text-gray-400"}`}
-                  >♥</button>
+
+                  <label className="block">
+                    <span className="text-sm">Add a review…</span>
+                    <textarea
+                      value={review}
+                      onChange={(e) => setReview(e.target.value)}
+                      rows={4}
+                      className="mt-1 block w-full rounded bg-gray-700 px-3 py-2 resize-none"
+                    />
+                  </label>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-1">
+                      <span className="text-sm mr-2">Rating</span>
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setRating(i)}
+                          className={`text-2xl ${i <= rating ? "text-yellow-400" : "text-gray-400"}`}
+                        >★</button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setLiked(!liked)}
+                      className={`text-2xl ${liked ? "text-red-400" : "text-gray-400"}`}
+                    >♥</button>
+                  </div>
+
+                  {error && <p className="text-sm text-red-400">{error}</p>}
                 </div>
 
-                { error && <p className="text-sm text-red-400">{error}</p> }
-              </div>
-
-              {/* Actions */}
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={handleSave}
-                  disabled={loading}
-                  className={`px-4 py-2 rounded ${loading ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-500"} text-white`}
-                >{ loading ? "Saving…" : "SAVE" }</button>
-              </div>
-            </DialogPanel>
-          </Transition.Child>
+                {/* Footer */}
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={handleSave}
+                    disabled={loading}
+                    className={`px-4 py-2 rounded ${loading ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-500"} text-white`}
+                  >
+                    {loading ? "Saving…" : "SAVE"}
+                  </button>
+                </div>
+              </DialogPanel>
+            </Transition.Child>
+          </div>
         </div>
       </Dialog>
     </Transition>

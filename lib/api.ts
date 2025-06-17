@@ -528,7 +528,7 @@ export async function fetchUserProfile(
 export async function fetchUserFollowing(
   byUsername: string,
   token: string
-): Promise<{ id: number; username: string }[]> {
+): Promise<FollowingUser[]> {
   const res = await fetch(
     `${baseUrl}/api/user/${encodeURIComponent(byUsername)}/following`,
     {
@@ -541,8 +541,9 @@ export async function fetchUserFollowing(
   )
   if (!res.ok) throw new Error("Failed to load following list")
   const json = await res.json()
-  return json.data
+  return json.data as FollowingUser[]
 }
+
 
 export async function followUser(
   targetUserId: number,
