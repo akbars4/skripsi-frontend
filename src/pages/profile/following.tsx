@@ -14,7 +14,7 @@ export default function ProfileFollowingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
+    <div className="min-h-screen bg-[#11161D] text-gray-100">
       <h1 className="text-2xl font-semibold p-8">Following</h1>
       <FollowingList />
     </div>
