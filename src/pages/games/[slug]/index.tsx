@@ -86,7 +86,7 @@ const GameDetailPage: React.FC<DetailProps> = ({ game }) => {
   }, [game.igdb_id]);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-[#11161D] text-white">
       <main className="container mx-auto p-4">
         <div className="flex flex-col lg:flex-row gap-7">
           {/* Cover + tombol */}

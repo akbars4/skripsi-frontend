@@ -1,32 +1,42 @@
-// src/components/FollowingList.tsx
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useAuth } from "@/context/AuthContext"
-import { fetchUserFollower, fetchUserFollowing } from "lib/api"
+import { fetchUserFollower } from "lib/api"
 import { FollowerUser } from "@/interfaces/api/ListsOfApiInterface"
 
-export default function FollowerList() {
+export default function FollowersList() {
   const { user, token } = useAuth()
-  const [list, setList]       = useState<FollowerUser[]>([])
+  const [list, setList] = useState<FollowerUser[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError]     = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user || !token) return
-    fetchUserFollower(user.username, token)
-      .then(setList)
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false))
+    const username = user.username
+    const authToken = token
+
+    async function load() {
+      try {
+        const data = await fetchUserFollower(username, authToken)
+        setList(data)
+      } catch (err: any) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    load()
   }, [user, token])
 
   if (!user) return null
   if (loading) return <div className="p-8 text-white">Loading...</div>
-  if (error)   return <div className="p-8 text-red-500">{error}</div>
+  if (error) return <div className="p-8 text-red-500">{error}</div>
 
   if (list.length === 0) {
     return (
       <div className="p-8 text-gray-400">
-        You’re not followed by anyone yet.
+        You don’t have any followers yet.
       </div>
     )
   }
@@ -52,10 +62,8 @@ export default function FollowerList() {
                 e.currentTarget.src = "/avatars/default.png"
               }}
             />
-            <Link href={`/user/${f.username}`}>
-              <a className="text-lg text-white hover:underline">
-                {f.username}
-              </a>
+            <Link href={`/profile/${f.username}`} className="text-lg text-white hover:underline">
+              {f.username}
             </Link>
           </li>
         )

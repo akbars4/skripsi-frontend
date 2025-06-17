@@ -53,7 +53,7 @@ export default function ProfilePage() {
     ? encodeURI(new URL(profile.profile_picture_url).pathname)
     : null;
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-8">
+    <div className="min-h-screen bg-[#11161D] text-gray-100 p-8">
       <div className="flex justify-between">
         <div className="flex items-center space-x-6 mb-12 just">
           {/* profile pic */}
@@ -93,7 +93,7 @@ export default function ProfilePage() {
             <Stat label="Following" value={profile.following_count} />
           </Link>
           <Link href="/profile/follower">
-            <Stat label="Follower" value={profile.follower_count} />
+            <Stat label="Followers" value={profile.follower_count} />
           </Link>
         </div>
       </div>
