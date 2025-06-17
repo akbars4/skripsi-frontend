@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { DiaryEntry } from '@/interfaces/api/ListsOfApiInterface';
@@ -10,14 +9,16 @@ export default function DiaryPage() {
   const { user, token } = useAuth();
   const [entries, setEntries] = useState<DiaryEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter()
-
+  const router = useRouter();
 
   useEffect(() => {
     if (!user || !token) return;
 
     fetchUserDiary(user.username, token)
-      .then(setEntries)
+      .then(data => {
+        const sorted = data.sort((a, b) => new Date(b.played_at).getTime() - new Date(a.played_at).getTime());
+        setEntries(sorted);
+      })
       .catch(() => setError('Gagal memuat diary'));
   }, [user, token]);
 
@@ -25,6 +26,8 @@ export default function DiaryPage() {
   if (error) return <p className="text-red-500">{error}</p>;
   if (entries === null) return <p>Loading…</p>;
   if (entries.length === 0) return <p>Belum ada entri diary.</p>;
+
+  let lastGroup = '';
 
   return (
     <div className="p-6 overflow-x-auto">
@@ -44,11 +47,19 @@ export default function DiaryPage() {
         <tbody>
           {entries.map((entry) => {
             const playedDate = new Date(entry.played_at);
+            const groupKey = format(playedDate, 'yyyy-MM'); // Unique per bulan dan tahun
+            const showGroup = groupKey !== lastGroup;
+            lastGroup = groupKey;
+
             return (
               <tr key={entry.id} className="border-b border-gray-800 hover:bg-gray-800">
                 <td className="py-3 font-bold text-blue-200">
-                  {format(playedDate, 'LLL').toUpperCase()}<br />
-                  <span className="text-xs">{format(playedDate, 'yyyy')}</span>
+                  {showGroup ? (
+                    <>
+                      {format(playedDate, 'LLL').toUpperCase()}<br />
+                      <span className="text-xs">{format(playedDate, 'yyyy')}</span>
+                    </>
+                  ) : null}
                 </td>
                 <td>{format(playedDate, 'dd')}</td>
                 <td className="flex items-center gap-2 py-2">
@@ -58,7 +69,7 @@ export default function DiaryPage() {
                 <td>{entry.game.released || '-'}</td>
                 <td>{'★'.repeat(entry.rating)}</td>
                 <td>
-                  <button title="Lihat review" className="hover:text-blue-400 " onClick={() => router.push(`/activity/${entry.id}`)}>
+                  <button title="Lihat review" className="hover:text-blue-400" onClick={() => router.push(`/activity/${entry.id}`)}>
                     📝
                   </button>
                 </td>
@@ -67,10 +78,10 @@ export default function DiaryPage() {
                   <button className="hover:text-red-500">🗑️</button>
                 </td>
               </tr>
-            )
+            );
           })}
         </tbody>
       </table>
     </div>
-  )
+  );
 }

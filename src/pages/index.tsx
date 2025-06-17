@@ -5,18 +5,15 @@ import HomePage from "../components/PopularList"
 import NavbarGuest from "../components/NavbarGuest";
 import Popular from "@/components/PopularList"
 import NewRelease from "@/components/NewReleaseList"
-
-
+import RecommendedList from "@/components/RecommendedList"
 
 
 export default function Home() {
   return (
-    <>
     <div className="">
-    {/* <Navbar/> */}
-    <Popular />
-    <NewRelease />
+      <Popular />
+      <RecommendedList />
+      <NewRelease />
     </div>
-    </>
   );
 }

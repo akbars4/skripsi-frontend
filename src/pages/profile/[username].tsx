@@ -157,9 +157,9 @@ export default function OtherProfilePage() {
       </h2>
       {profile.recently_played.length > 0 ? (
         <GameGrid
-          games={profile.recently_played.map((entry) =>
-            mapToGame(entry.game)
-          )}
+          games={profile.recently_played
+            .filter((entry) => entry.game !== undefined && entry.game !== null)
+            .map((entry) => mapToGame(entry.game))}
         />
       ) : (
         <p className="text-gray-400">No recently played games.</p>

@@ -63,10 +63,8 @@ export default function FollowingList() {
                 e.currentTarget.src = "/avatars/default.png"
               }}
             />
-            <Link href={`/user/${f.username}`}>
-               className="text-lg text-white hover:underline"
-                {f.username}
-              
+            <Link href={`/profile/${f.username}`} className="text-lg text-white hover:underline">
+              {f.username}
             </Link>
           </li>
         )
