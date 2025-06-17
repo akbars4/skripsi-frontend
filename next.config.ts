@@ -1,9 +1,7 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+const nextConfig = {
   reactStrictMode: true,
   eslint: {
-    ignoreDuringBuilds: true, // ✅ Tambahkan ini
+    ignoreDuringBuilds: true,
   },
   images: {
     remotePatterns: [
