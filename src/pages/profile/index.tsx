@@ -21,6 +21,12 @@ export default function ProfilePage() {
       router.push("/login");
       return;
     }
+  
+  const handleClick = () => {
+    // simple redirect
+    router.push("/activity");
+    // atau kalau mau preselect slug: router.push(`/lists?select=${slug}`);
+  };
 
     const loadProfile = async () => {
       try {

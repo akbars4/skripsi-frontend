@@ -34,7 +34,9 @@ interface DetailProps {
   game: Game;
 }
 
-export const getServerSideProps: GetServerSideProps<DetailProps> = async (ctx) => {
+export const getServerSideProps: GetServerSideProps<DetailProps> = async (
+  ctx
+) => {
   const { slug } = ctx.params!;
   try {
     const game = await getGameBySlug(slug as string);
@@ -48,6 +50,11 @@ const GameDetailPage: React.FC<DetailProps> = ({ game }) => {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
 
+  const handleClick = () => {
+    // simple redirect
+    router.push("/lists");
+    // atau kalau mau preselect slug: router.push(`/lists?select=${slug}`);
+  };
   const [isReviewOpen, setIsReviewOpen] = useState(false);
   const openReview = () => {
     if (!isAuthenticated) {
@@ -98,7 +105,13 @@ const GameDetailPage: React.FC<DetailProps> = ({ game }) => {
             />
             <div className="flex flex-col justify-between mt-2 w-full">
               <div className="flex flex-row mt-2 space-x-2">
-                <AddToGameListButton slug={game.slug} />
+                {/* <AddToGameListButton slug={game.slug} /> */}
+                <button
+                  onClick={handleClick}
+                  className="bg-blue-600 px-3 py-1 rounded hover:bg-blue-500"
+                >
+                  Add to List
+                </button>
                 <AddToFavoritesButton igdbId={game.igdb_id} />
               </div>
               <button
@@ -107,7 +120,7 @@ const GameDetailPage: React.FC<DetailProps> = ({ game }) => {
               >
                 Add to Review
               </button>
-              <AddToWantToPlayButton slug={game.slug} />
+              {/* <AddToWantToPlayButton slug={game.slug} /> */}
             </div>
           </div>
 
