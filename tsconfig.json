@@ -13,10 +13,13 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "baseUrl": ".", // ✅ required
     "paths": {
-      "@/*": ["./src/*"]
+      // "@/components/*": ["components/*"],
+      // "@/interfaces/*": ["interfaces/*"]
+      "@/*": ["src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "src/pages/Login.tsxx"],
   "exclude": ["node_modules"]
 }
