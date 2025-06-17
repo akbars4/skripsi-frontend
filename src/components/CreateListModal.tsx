@@ -1,156 +1,214 @@
 // src/components/CreateListModal.tsx
-import { Fragment, useState } from "react";
+import { Fragment, useState, useEffect, useCallback } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { useAuth } from "@/context/AuthContext";
-// import { CreateListBody, createUserList } from "lib/api";
-import { createUserList, getGameBySlug } from "lib/api";
 import { useRouter } from "next/router";
-import { CreateListBody } from "@/interfaces/api/ListsOfApiInterface";
+import { useAuth } from "@/context/AuthContext";
+import { searchGames, createUserList } from "lib/api";
+import type { Game } from "@/interfaces/Game";
+import type { CreateListBody, UserList } from "@/interfaces/api/ListsOfApiInterface";
 
-interface Props {
+interface SelectedGame {
+  id: number;
+  name: string;
+}
+
+interface CreateListModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCreated: () => void;
 }
 
-export default function CreateListModal({ isOpen, onClose, onCreated }: Props) {
-  const { token, isAuthenticated } = useAuth();
+export default function CreateListModal({
+  isOpen,
+  onClose,
+  onCreated,
+}: CreateListModalProps) {
   const router = useRouter();
+  const { token, isAuthenticated } = useAuth();
 
-  const [title, setTitle] = useState("");
+  // Form fields
+  const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [gameSlug, setGameSlug] = useState("");
-  const [games, setGames] = useState<{ id: number; name: string }[]>([]);
-  const [loading, setLoading] = useState(false);
+
+  // Search + suggestions
+  const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState<Game[]>([]);
+  const [fetching, setFetching] = useState(false);
+
+  // Selected games for this list
+  const [games, setGames] = useState<SelectedGame[]>([]);
+
+  // Feedback
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  async function addGame() {
-    try {
-      const g = await getGameBySlug(gameSlug);
-      setGames((prev) => [...prev, { id: g.id, name: g.name }]);
-      setGameSlug("");
-    } catch {
-      setError("Game not found");
+  // Debounced search
+  useEffect(() => {
+    if (searchQuery.length < 2) {
+      setSuggestions([]);
+      return;
     }
-  }
+    setFetching(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await searchGames(searchQuery);
+        setSuggestions(res.data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setFetching(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
-  async function handleSubmit() {
+  // Add a game from suggestions
+  const addGame = useCallback(
+    (g: Game) => {
+      const sg: SelectedGame = { id: g.igdb_id, name: g.name };
+      if (games.some((x) => x.id === sg.id)) return;
+      setGames((prev) => [...prev, sg]);
+      setSearchQuery("");
+      setSuggestions([]);
+    },
+    [games]
+  );
+
+  // Remove a selected game
+  const removeGame = useCallback((id: number) => {
+    setGames((prev) => prev.filter((x) => x.id !== id));
+  }, []);
+
+  // Submit the new list
+  const handleSubmit = async () => {
     if (!isAuthenticated) {
       router.push("/login");
       return;
     }
-    if (!title.trim() || games.length === 0) {
-      setError("Title and at least one game required");
+    if (!name.trim() || games.length === 0) {
+      setError("Name and at least one game are required");
       return;
     }
 
     setLoading(true);
     setError(null);
-    try {
-        const body: CreateListBody = {
-      title,                         // use your modal’s title
-      description,                               // description unchanged
-      game_ids: games.map(g=>g.id)  // id array format
+
+    const body: CreateListBody = {
+      name,
+      description,
+      game_ids: games.map((x) => x.id),
     };
-      await createUserList(body,
-        token!
-      );
+
+    try {
+      const created: UserList = await createUserList(body, token!);
       onCreated();
       onClose();
     } catch (e: any) {
+      console.error(e);
       setError(e.message || "Failed to create list");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
-        {/* BACKDROP */}
+        {/* Backdrop */}
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-200"
-          enterFrom="opacity-0"
-          enterTo="opacity-75"
+          enterFrom="opacity-0" enterTo="opacity-75"
           leave="ease-in duration-150"
-          leaveFrom="opacity-75"
-          leaveTo="opacity-0"
+          leaveFrom="opacity-75" leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-black" />
         </Transition.Child>
 
-        {/* CENTERING TRICK */}
+        {/* Panel */}
         <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
-            {/* PANEL */}
+          <div className="flex min-h-full items-center justify-center p-4">
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-200"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
+              enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100"
               leave="ease-in duration-150"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
+              leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-lg bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
-                <Dialog.Title
-                  as="h3"
-                  className="text-xl font-semibold leading-6 text-white mb-4"
-                >
+              <Dialog.Panel className="w-full max-w-md bg-gray-800 p-6 rounded-lg shadow-xl text-left">
+                <Dialog.Title className="text-xl font-semibold text-white mb-4">
                   Create New List
                 </Dialog.Title>
 
-                {/* FORM FIELDS */}
+                {/* List Name */}
                 <input
                   type="text"
-                  placeholder="Title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-gray-200 text-gray-900 p-2 rounded mb-4"
+                  placeholder="List Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-gray-700 text-white p-2 rounded mb-4"
                 />
+
+                {/* Description */}
                 <textarea
                   rows={3}
                   placeholder="Description…"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-gray-200 text-gray-900 p-2 rounded mb-4"
+                  className="w-full bg-gray-700 text-white p-2 rounded mb-4"
                 />
 
-                {/* ADD GAMES BY SLUG */}
-                <div className="flex mb-2 space-x-2">
+                {/* Search Games */}
+                <div className="relative mb-4">
                   <input
                     type="text"
-                    placeholder="Enter a game slug…"
-                    value={gameSlug}
-                    onChange={(e) => setGameSlug(e.target.value)}
-                    className="flex-1 bg-gray-200 text-gray-900 p-2 rounded"
+                    placeholder="Search games…"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-gray-700 text-white p-2 rounded"
                   />
-                  <button
-                    onClick={addGame}
-                    className="px-4 bg-blue-600 hover:bg-blue-500 text-white rounded"
-                  >
-                    Add
-                  </button>
+                  {fetching && (
+                    <span className="absolute right-2 top-2 text-gray-400">
+                      ⏳
+                    </span>
+                  )}
+                  {suggestions.length > 0 && (
+                    <ul className="absolute z-10 w-full bg-gray-700 rounded mt-1 max-h-40 overflow-auto">
+                      {suggestions.map((g) => (
+                        <li
+                          key={g.igdb_id}
+                          className="px-3 py-2 hover:bg-gray-600 cursor-pointer text-white"
+                          onClick={() => addGame(g)}
+                        >
+                          {g.name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
-                <ul className="mb-4 text-gray-200">
+
+                {/* Selected Games */}
+                <ul className="mb-4 space-y-2 text-gray-200">
                   {games.map((g) => (
-                    <li key={g.id} className="flex justify-between">
+                    <li
+                      key={g.id}
+                      className="flex justify-between items-center bg-gray-700 p-2 rounded"
+                    >
                       {g.name}
                       <button
-                        onClick={() =>
-                          setGames((s) => s.filter((x) => x.id !== g.id))
-                        }
+                        onClick={() => removeGame(g.id)}
+                        className="text-red-400 hover:text-red-600"
                       >
-                        &times;
+                        ×
                       </button>
                     </li>
                   ))}
                 </ul>
 
-                {error && <p className="text-red-400 mb-2">{error}</p>}
+                {/* Error */}
+                {error && <p className="text-red-500 mb-2">{error}</p>}
 
-                {/* ACTIONS */}
+                {/* Actions */}
                 <div className="flex justify-end space-x-2">
                   <button
                     onClick={onClose}

@@ -3,12 +3,9 @@ import { useState } from "react";
 import { GetServerSideProps } from "next";
 import { useAuth } from "@/context/AuthContext";
 import CreateThreadModal from "@/components/CreateThreadModal";
-import {
-  getGameBySlug,
-  fetchForumThreadsBySlug,
-  
-} from "lib/api";
+import { getGameBySlug, fetchForumThreadsBySlug } from "lib/api";
 import { ForumThread, GameLocal } from "@/interfaces/api/ListsOfApiInterface";
+import Link from "next/link";
 
 export interface ForumPageProps {
   slug: string;
@@ -19,42 +16,26 @@ export interface ForumPageProps {
   nextPage: number | null;
 }
 
-export const getServerSideProps: GetServerSideProps<ForumPageProps> = async ({
-  params,
-  query,
-}) => {
+export const getServerSideProps: GetServerSideProps<ForumPageProps> = async ({ params, query }) => {
   const slug = String(params?.slug);
   const page = parseInt(String(query.page || "1"), 10);
 
   try {
-    // 1) Fetch the full game object so we have its numeric ID
     const game = await getGameBySlug(slug);
-
-    // 2) Fetch the forum threads for that slug + page
     const { threads, currentPage, lastPage, nextPage } =
       await fetchForumThreadsBySlug({ slug, page });
 
-    return {
-      props: { slug, game, threads, currentPage, lastPage, nextPage },
-    };
+    return { props: { slug, game, threads, currentPage, lastPage, nextPage } };
   } catch (err) {
     console.error("Error in getServerSideProps:", err);
     return { notFound: true };
   }
 };
 
-export default function ForumThreadsPage({
-  slug,
-  game,
-  threads,
-  currentPage,
-  lastPage,
-  nextPage,
-}: ForumPageProps) {
+export default function ForumThreadsPage({ slug, game, threads, currentPage, lastPage, nextPage }: ForumPageProps) {
   const { token, isAuthenticated } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // when a new thread is created, we’ll just refresh the page
   const handleCreated = () => {
     setIsModalOpen(false);
     window.location.reload();
@@ -74,40 +55,37 @@ export default function ForumThreadsPage({
         <ul className="space-y-4">
           {threads.map((t) => (
             <li key={t.id} className="p-4 bg-gray-800 rounded">
-              <p className="font-semibold">{t.title}</p>
-              <p className="text-sm text-gray-400">{t.content}</p>
-              <p className="text-xs text-gray-500">
-                by {t.user.username} · {t.replies_count} replies
-              </p>
+              <Link href={`/forum/${encodeURIComponent(slug)}/thread/${t.id}`}>  
+                <div className="block space-y-2 hover:bg-gray-700 p-2 rounded">
+                  <p className="font-semibold text-white">{t.title}</p>
+                  <p className="text-sm text-gray-400 truncate">{t.content}</p>
+                  <p className="text-xs text-gray-500">
+                    by {t.user.username} · {t.replies_count} replies
+                  </p>
+                </div>
+              </Link>
             </li>
           ))}
         </ul>
 
-        {/* Pagination controls */}
         <div className="mt-6 flex items-center space-x-4">
           {currentPage > 1 && (
-            <a
-              href={`/forum/${slug}?page=${currentPage - 1}`}
-              className="px-3 py-1 bg-gray-700 rounded"
-            >
-              ← Prev
-            </a>
+            <Link href={`/forum/${slug}?page=${currentPage - 1}`}>
+              <div className="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600">← Prev</div>
+            </Link>
           )}
           <span className="px-3 py-1 bg-blue-600 rounded">{currentPage}</span>
           {nextPage && (
-            <a
-              href={`/forum/${slug}?page=${nextPage}`}
-              className="px-3 py-1 bg-gray-700 rounded"
-            >
-              Next →
-            </a>
+            <Link href={`/forum/${slug}?page=${nextPage}`}>
+              <div className="px-3 py-1 bg-gray-700 rounded hover:bg-gray-600">Next →</div>
+            </Link>
           )}
         </div>
       </div>
 
       <CreateThreadModal
         slug={slug}
-        gameLocalId={game.id}      // ← this was missing
+        gameLocalId={game.id}
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onCreated={handleCreated}

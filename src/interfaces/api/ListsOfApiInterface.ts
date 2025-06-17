@@ -98,7 +98,7 @@ export interface UserList {
 }
 
 export interface CreateListBody {
-  title: string;
+  name: string;
   description: string;
   game_ids: number[];
 }
@@ -137,24 +137,26 @@ export interface ProfileResponse {
   diary_count: number
   wishlist_count: number
   played_game_count: number
-  favorites: Array<{
-    id: number
+  favorites: {
+    igdb_id: number
     name: string
-    slug: string
-    cover: string
-  }>
-  recently_played: Array<{
-    id: number
+    slug?: string
+    cover_url: string
+  }[]
+  recently_played: {
+    game : {
+    igdb_id: number
     name: string
-    slug: string
-    cover: string
-  }>
-  game_list_preview: Array<{
-     id: number
+    // slug?: string
+    cover_url: string
+    }
+  }[]
+  game_list_preview: {
+    igdb_id: number
     name: string
-    slug: string
-    cover: string
-  }>
+    slug?: string
+    cover_url: string
+  }[]
   // kalau ada properti lain (misal lists), tambahkan juga di sini
 }
 
@@ -255,3 +257,13 @@ export interface ActivityDetail {
   }[]
 }
 
+export interface DiaryComment {
+  id: number;
+  comment: string;
+  created_at: string;
+  user: {
+    id: number;
+    username: string;
+    profile_picture_url: string | null;
+  };
+}

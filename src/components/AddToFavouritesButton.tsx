@@ -33,7 +33,7 @@ export default function AddToFavoritesButton({ igdbId }: AddToFavoritesButtonPro
 
       // Setelah berhasil, langsung redirect ke halaman favorite list
       // (misal route-nya: /favorites)
-      router.push("/favorites");
+      // router.push("/favorites");
     } catch (err: any) {
       console.error("Error adding to favorites:", err);
       setError(err.message || "Failed to add to favorites.");

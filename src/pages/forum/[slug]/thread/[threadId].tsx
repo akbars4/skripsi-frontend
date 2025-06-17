@@ -1,4 +1,3 @@
-
 // src/pages/forum/[slug]/thread/[threadId].tsx
 import { GetServerSideProps } from "next";
 import { useState } from "react";
@@ -7,11 +6,8 @@ import Navbar from "@/components/Navbar";
 import { useAuth } from "@/context/AuthContext";
 import {
   getGameBySlug,
-  fetchForumThreadsBySlug,
-  fetchRepliesByThreadId,
+  fetchThreadById,
   createForumReply,
-  // ForumThread,
-  // Reply,
 } from "lib/api";
 import { ForumThread, Reply } from "@/interfaces/api/ListsOfApiInterface";
 
@@ -23,44 +19,33 @@ interface Game {
 
 interface Props {
   game: Game;
-  thread: ForumThread;
-  initialReplies: Reply[];
+  thread: ForumThread & { replies: Reply[] };
 }
 
-export const getServerSideProps: GetServerSideProps<
-  Props,
-  { slug: string; threadId: string }
-> = async ({ params }) => {
+export const getServerSideProps: GetServerSideProps<Props, { slug: string; threadId: string }> = async ({ params }) => {
   if (!params) return { notFound: true };
 
   const { slug, threadId } = params;
   const tid = parseInt(threadId, 10);
+  if (isNaN(tid)) return { notFound: true };
 
-  // 1) load game
-  const game = await getGameBySlug(slug);
-
-  // 2) load all threads for this game, then pick the one we need
-  const { threads } = await fetchForumThreadsBySlug({ slug });
-  const thread = threads.find((t) => t.id === tid);
-  if (!thread) return { notFound: true };
-
-  // 3) separately load the replies array
-  const initialReplies = await fetchRepliesByThreadId(tid);
-
-  return {
-    props: { game, thread, initialReplies },
-  };
+  try {
+    // Load game data
+    const game = await getGameBySlug(slug);
+    // Fetch thread detail using correct slug + ID
+    const thread = await fetchThreadById(slug, tid);
+    return { props: { game, thread } };
+  } catch (error) {
+    console.error("Error loading thread detail:", error);
+    return { notFound: true };
+  }
 };
 
-export default function ThreadReplyPage({
-  game,
-  thread,
-  initialReplies,
-}: Props) {
+export default function ThreadReplyPage({ game, thread }: Props) {
   const router = useRouter();
   const { isAuthenticated, token, loading: authLoading } = useAuth();
 
-  const [replies, setReplies] = useState<Reply[]>(initialReplies);
+  const [replies, setReplies] = useState<Reply[]>(thread.replies || []);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,9 +84,7 @@ export default function ThreadReplyPage({
 
           {/* Replies */}
           <div className="space-y-4">
-            {replies.length === 0 && (
-              <p className="text-gray-400">No replies yet.</p>
-            )}
+            {replies.length === 0 && <p className="text-gray-400">No replies yet.</p>}
             {replies.map((r) => (
               <div key={r.id} className="bg-gray-800 p-4 rounded-lg">
                 <div className="flex items-center space-x-3">
@@ -111,12 +94,8 @@ export default function ThreadReplyPage({
                     className="w-8 h-8 rounded-full"
                   />
                   <div>
-                    <p className="font-semibold text-white">
-                      {r.user.username}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {new Date(r.created_at).toLocaleString()}
-                    </p>
+                    <p className="font-semibold text-white">{r.user.username}</p>
+                    <p className="text-xs text-gray-400">{new Date(r.created_at).toLocaleString()}</p>
                   </div>
                 </div>
                 <p className="mt-2 text-gray-200">{r.content}</p>
@@ -157,14 +136,9 @@ export default function ThreadReplyPage({
 
         {/* Right column: cover */}
         <div className="hidden lg:block w-1/4">
-          <img
-            src={game.cover}
-            alt={game.name}
-            className="rounded-lg shadow-lg"
-          />
+          <img src={game.cover} alt={game.name} className="rounded-lg shadow-lg" />
         </div>
       </main>
     </div>
   );
 }
-

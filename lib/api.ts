@@ -1,7 +1,7 @@
 //  --------------------- api login user -------------------------------
 // lib/api.ts
 
-import { ActivityDetail, CreateDiaryBody, CreateListBody, CreateThreadBody, DiaryDetail, DiaryEntry, FetchForumThreadsBySlugOpts, FollowerUser, FollowingUser, ForumThread, LoginResponse, ProfileResponse, Reply, UserList } from "@/interfaces/api/ListsOfApiInterface";
+import { ActivityDetail, CreateDiaryBody, CreateListBody, CreateThreadBody, DiaryComment, DiaryDetail, DiaryEntry, FetchForumThreadsBySlugOpts, FollowerUser, FollowingUser, ForumThread, LoginResponse, ProfileResponse, Reply, UserList } from "@/interfaces/api/ListsOfApiInterface";
 import { Game } from "@/interfaces/Game";
 
 
@@ -165,7 +165,7 @@ export async function logout() {
 
 // api game detail
 // ------------------------------- api button to add game to gamelist ----------------------------
-// ([pages/[slug]/index.tsx])
+// ([pages/game/[slug]/index.tsx])
 export async function addToGameList(slug: string) {
   const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
@@ -189,7 +189,7 @@ export async function addToFavorites(igdb_id: number, token: string) {
       "Content-Type": "application/json",
       "X-API-KEY": apiKey || "",
       // Jika backend memeriksa Bearer token, gunakan:
-      // "Authorization": `Bearer ${token}`,
+      "Authorization": `Bearer ${token}`,
     },
     credentials: "include", // jika backend menggunakan cookie/session
     body: JSON.stringify({ igdb_id }),
@@ -412,7 +412,7 @@ export interface forumThreadDetail extends ForumThread{
 /**
  * GET a single forum thread by its ID (includes nested `replies`)
  */
-export async function fetchThreadById(threadId: number): Promise<forumThreadDetail> {
+export async function fetchThreadById(slug: string, threadId: number): Promise<forumThreadDetail> {
   const res = await fetch(`${baseUrl}/api/forum/${threadId}`, {
     headers: { "X-API-KEY": apiKey || "" },
   });
@@ -423,9 +423,10 @@ export async function fetchThreadById(threadId: number): Promise<forumThreadDeta
 }
 
 export async function fetchRepliesByThreadId(
-  threadId: number
+    slug: string,
+  threadId: number,
 ): Promise<Reply[]> {
-  const detail = await fetchThreadById(threadId);
+  const detail = await fetchThreadById(slug, threadId);
   return detail.replies;
 }
 
@@ -713,9 +714,69 @@ export const fetchActivityDetail = async (
     headers['cookie'] = ctx.req.headers.cookie
   }
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/activity/${id}`,
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/{username}/activity/${id}`,
     { headers }
   )
   if (!res.ok) throw new Error(`Status ${res.status}`)
   return res.json()
+}
+
+// lib/api.ts
+
+//========= api activity / diary fix ===========
+export async function fetchUserDiary(username: string, token: string): Promise<DiaryEntry[]> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/${username}/diary`,
+    {
+      method: 'GET',
+      headers: {
+        "X-API-KEY": apiKey || "",
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch diary: ${res.status}`);
+  }
+
+  const json = await res.json();
+  return json.data; // array of DiaryEntry
+}
+
+
+export async function fetchDiaryComments(diaryId: number): Promise<DiaryComment[]> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/diary/${diaryId}/comments`,
+    {
+      method: 'GET',
+      headers: { Accept: 'application/json' },
+    }
+  )
+  if (!res.ok) throw new Error('Gagal mengambil komentar')
+  const json = await res.json()
+  return json.data
+}
+
+export async function postDiaryComment(
+  diaryId: number,
+  comment: string,
+  token: string
+): Promise<DiaryComment> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/diary/comments`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({ diary_id: diaryId, comment }),
+    }
+  )
+  if (!res.ok) throw new Error('Gagal mengirim komentar')
+  const json = await res.json()
+  return json.data
 }
