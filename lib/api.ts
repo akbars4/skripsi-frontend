@@ -503,6 +503,19 @@ export async function createUserList(
   return json.data as UserList;
 }
 
+export async function fetchUserListDetail(username: string, slug: string, token: string): Promise<UserList> {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/${username}/lists/${slug}`, {
+    headers: {
+       "X-API-KEY": apiKey || "",
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+  const json = await res.json();
+  return json.data;
+}
+
+
 // ----------------------- api buat profile page -----------------------
 
 

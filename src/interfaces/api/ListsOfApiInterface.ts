@@ -81,6 +81,7 @@ export interface GameLocal {
 export interface UserList {
   id: number;
   title: string;
+  slug: string;
   description: string;
   // games: GameLocal[];
   username: string;
@@ -93,6 +94,7 @@ export interface UserList {
       igdb_id: number;
       name: string;
       cover_url: string;
+      slug: string;
     };
   }[];
 }
