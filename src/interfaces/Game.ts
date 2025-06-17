@@ -1,6 +1,7 @@
 // interfaces/Game.ts
 
 export interface Game {
+  id: number;
  igdb_id: number;
   name: string;
   slug: string;

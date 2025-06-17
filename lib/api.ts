@@ -692,17 +692,28 @@ export async function fetchDiaryList(): Promise<ApiResponse<DiaryEntry[]>> {
  * Fetch detail satu entry berdasarkan ID
  */
 export async function fetchDiaryDetail(
-  id: number
-): Promise<ApiResponse<DiaryDetail>> {
-  const res = await fetch(`${baseUrl}/api/diary/${id}`, {
-    headers: {
-      "X-API-KEY": apiKey || "",
-      "Accept":    "application/json",
-    },
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error(`Gagal ambil diary detail (${res.status})`);
-  return res.json();
+  username: string,
+  diaryId: number,
+  token: string
+): Promise<DiaryEntry> {
+  const res = await fetch(
+    `${baseUrl}/api/user/${username}/diary/${diaryId}`,
+    {
+      method: 'GET',
+      headers: {
+        "X-API-KEY": apiKey || "",
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/json',
+      },
+    }
+  )
+
+  if (!res.ok) {
+    throw new Error(`Gagal fetch diary detail: ${res.status}`)
+  }
+
+  const json = await res.json()
+  return json.data // assumed to be a DiaryEntry
 }
 
 export const fetchActivityDetail = async (
@@ -747,12 +758,17 @@ export async function fetchUserDiary(username: string, token: string): Promise<D
 }
 
 
-export async function fetchDiaryComments(diaryId: number): Promise<DiaryComment[]> {
+export async function fetchDiaryComments(diaryId: number, token: string): Promise<DiaryComment[]> {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/diary/${diaryId}/comments`,
     {
       method: 'GET',
-      headers: { Accept: 'application/json' },
+      headers: { 
+        Accept: 'application/json',
+        "X-API-KEY": apiKey || "",
+        Authorization: `Bearer ${token}`,
+
+       },
     }
   )
   if (!res.ok) throw new Error('Gagal mengambil komentar')

@@ -138,6 +138,7 @@ export interface ProfileResponse {
   wishlist_count: number
   played_game_count: number
   favorites: {
+    id: number 
     igdb_id: number
     name: string
     slug?: string
@@ -145,6 +146,7 @@ export interface ProfileResponse {
   }[]
   recently_played: {
     game : {
+      id: number
     igdb_id: number
     name: string
     // slug?: string
@@ -152,6 +154,7 @@ export interface ProfileResponse {
     }
   }[]
   game_list_preview: {
+    id: number
     igdb_id: number
     name: string
     slug?: string
@@ -259,9 +262,9 @@ export interface ActivityDetail {
 
 export interface DiaryComment {
   id: number;
-  comment: string;
+  content: string;
   created_at: string;
-  user: {
+  user?: {
     id: number;
     username: string;
     profile_picture_url: string | null;

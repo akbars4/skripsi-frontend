@@ -41,7 +41,8 @@ export default function ProfilePage() {
     return <div className="p-8 text-white">Loading...</div>;
 
   const mapToGame = (item: any): Game => ({
-    igdb_id: item.id,
+    id: item.id, // ✅ tambahkan ini
+  igdb_id: item.igdb_id ?? item.id,
     name: item.name,
     slug: item.slug,
     cover: item.cover,

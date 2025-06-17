@@ -2,8 +2,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { DiaryComment, DiaryEntry } from '@/interfaces/api/ListsOfApiInterface'
-// import { DiaryComment } from '@/interfaces/api/DiaryComment'
-import { fetchDiaryComments, postDiaryComment } from 'lib/api'
+import { fetchDiaryComments, fetchDiaryDetail, postDiaryComment } from 'lib/api'
 
 export default function DiaryDetailPage() {
   const router = useRouter()
@@ -16,19 +15,26 @@ export default function DiaryDetailPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!id || Array.isArray(id)) return
+    if (!router.isReady || !id || Array.isArray(id) || !user || !token) return
     const diaryId = parseInt(id)
 
-    // fetch detail diary (saat ini bisa dummy hardcoded sementara)
-    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/${user?.username}/diary`)
-      .then(res => res.json())
-      .then(json => {
-        const found = json.data.find((d: DiaryEntry) => d.id === diaryId)
-        setEntry(found || null)
+    fetchDiaryDetail(user.username, diaryId, token)
+      .then(setEntry)
+      .catch((err) => {
+        console.error("Gagal ambil detail diary →", err)
+        setError('Gagal mengambil detail review')
       })
 
-    fetchDiaryComments(diaryId).then(setComments).catch(console.error)
-  }, [id, user?.username])
+    fetchDiaryComments(diaryId, token)
+      .then((data) => {
+        console.log("✅ Comments fetched →", data)
+        setComments(data)
+      })
+      .catch((err) => {
+        console.error("Gagal ambil komentar →", err)
+        setError('Gagal mengambil komentar')
+      })
+  }, [id, router.isReady, user, token])
 
   const handleSubmit = async () => {
     if (!id || !token || !commentInput.trim()) return
@@ -50,8 +56,8 @@ export default function DiaryDetailPage() {
     <div className="p-6 max-w-3xl mx-auto">
       <div className="flex gap-4 mb-6">
         <img
-          src={entry.game.cover_url}
-          alt={entry.game.name}
+          src={entry.game?.cover_url}
+          alt={entry.game?.name || 'Game'}
           className="w-32 h-48 object-cover rounded"
         />
         <div>
@@ -60,7 +66,7 @@ export default function DiaryDetailPage() {
           <p className="italic mt-2">“{entry.review}”</p>
           <p className="mt-4 text-sm">Played on <strong>{entry.platform}</strong></p>
           <p className="text-sm">
-            Completed in <strong>{entry.replay_count ?? 0 * 10 + 87}</strong> hours of gameplay
+            Completed in <strong>{(entry.replay_count ?? 0) * 10 + 87}</strong> hours of gameplay
           </p>
         </div>
       </div>
@@ -88,8 +94,10 @@ export default function DiaryDetailPage() {
         <h3 className="text-lg font-semibold mb-2">Comments :</h3>
         {comments.map((c) => (
           <div key={c.id} className="mb-4">
-            <p className="font-bold uppercase text-sm">{c.user.username}</p>
-            <p className="text-sm">{c.comment}</p>
+            <p className="font-bold uppercase text-sm">
+              {c.user?.username || 'Unknown User'}
+            </p>
+            <p className="text-sm text-gray-300">{c.content || '(No comment)'}</p>
           </div>
         ))}
       </div>

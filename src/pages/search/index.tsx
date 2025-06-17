@@ -83,36 +83,31 @@ const SearchPage: NextPage = () => {
       )}
 
       {/* FORUM */}
-     {filter === 'forum' && (
-  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-    {games.map((game) => {
-      console.log('→ forum item', game)    // ← verify that id & slug exist
-      return (
-        <Link
-          key={game.igdb_id}
-          href={{
-    pathname: '/forum/[slug]',
-    query: { slug: game.slug, threadId: game.igdb_id },
-  }}
-        >
-          <div className="block bg-gray-100 rounded-lg overflow-hidden hover:shadow-md">
-            <div className="relative w-full h-32">
-              <Image
-                src={game.cover || 'https://via.placeholder.com/264x374?text=No+Image'}
-                alt={game.name}
-                fill
-                style={{ objectFit: 'cover' }}
-              />
-            </div>
-            <div className="p-2">
-              <h3 className="font-medium">{game.name}</h3>
-            </div>
-          </div>
-        </Link>
-      )
-    })}
+{filter === 'forum' && (
+  <div className="space-y-4">
+    {games.map((game) => (
+      <Link
+        key={game.igdb_id}
+        href={{
+          pathname: '/forum/[slug]',
+          query: { slug: game.slug, threadId: game.igdb_id },
+        }}
+        className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4"
+      >
+        <img
+          src={game.cover_url || 'https://via.placeholder.com/264x374?text=No+Image'}
+          alt={game.name}
+          className="w-16 h-24 object-cover"
+        />
+        <div className="px-4 py-2">
+          <h3 className="text-white text-base font-semibold">{game.name}</h3>
+          {/* <p className="text-gray-400 text-sm">{game. || 'Unknown Year'}</p> */}
+        </div>
+      </Link>
+    ))}
   </div>
 )}
+
     </div>
   );
 };
