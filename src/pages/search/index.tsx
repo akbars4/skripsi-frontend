@@ -1,152 +1,114 @@
-// // pages/search.tsx
-// import React, { useState } from 'react';
-// import type { NextPage } from 'next';
-// import Link from 'next/link';
+// pages/search.tsx
+import React, { useState } from 'react';
+import type { NextPage } from 'next';
+import Link from 'next/link';
 
-// import GameGrid from '@/components/GameGrid';
-// import FilterButton from '@/components/FilterButton';
-// import UserCard from '@/components/UserCard';
-// import ForumCard from '@/components/ForumCard';
+import GameGrid from '@/components/GameGrid';
+import FilterButton from '@/components/FilterButton';
+import UserCard from '@/components/UserCard';
+import ForumCard from '@/components/ForumCard';
 
-// import { searchGames, searchUsers, searchForums } from 'lib/api';
-// import { Game } from '@/interfaces/Game';
-// import { ForumThread, ProfileResponse } from '@/interfaces/api/ListsOfApiInterface';
-// import Image from 'next/image';
-// // import { Game, User, ForumThread } from '@/interfaces/ListOfApiInterface';
+import { searchGames, searchUsers, searchForums } from 'lib/api';
+import { Game } from '@/interfaces/Game';
+import { ForumThread, ProfileResponse } from '@/interfaces/api/ListsOfApiInterface';
+import Image from 'next/image';
+// import { Game, User, ForumThread } from '@/interfaces/ListOfApiInterface';
 
-// const SearchPage: NextPage = () => {
-//   const [query, setQuery] = useState('');
-//   const [filter, setFilter] = useState<'game' | 'user' | 'forum'>('game');
+const SearchPage: NextPage = () => {
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState<'game' | 'user' | 'forum'>('game');
 
-//   const [games, setGames] = useState<Game[]>([]);
-//   const [users, setUsers] = useState<ProfileResponse[]>([]);
+  const [games, setGames] = useState<Game[]>([]);
+  const [users, setUsers] = useState<ProfileResponse[]>([]);
 
-//   const handleSearch = async () => {
-//     if (!query.trim()) return;
-//     try {
-//       if (filter === 'game') {
-//         const res = await searchGames(query);
-//         setGames(res.data);
-//       } else if (filter === 'user') {
-//         const res = await searchUsers(query);
-//         setUsers(res.data);
-//       } else {
-//         const res = await searchGames(query);
-//         console.log('forum-by-game: ', res.data);
-//         setGames(res.data);
-//       }
-//     } catch (err) {
-//       console.error(err);
-//     }
-//   };
+  const handleSearch = async () => {
+    if (!query.trim()) return;
+    try {
+      if (filter === 'game') {
+        const res = await searchGames(query);
+        setGames(res.data);
+      } else if (filter === 'user') {
+        const res = await searchUsers(query);
+        setUsers(res.data);
+      } else {
+        const res = await searchGames(query);
+        console.log('forum-by-game: ', res.data);
+        setGames(res.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-//   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-//     if (e.key === 'Enter') handleSearch();
-//   };
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') handleSearch();
+  };
 
-//   return (
-//     <div className="min-h-screen bg-[#11161D] text-white">
-//       <div className="max-w-4xl mx-auto py-8 px-4">
-//         <h1 className="text-2xl font-semibold mb-4">Search</h1>
+  return (
+    <div className="min-h-screen bg-[#11161D] text-white">
+      <div className="max-w-4xl mx-auto py-8 px-4">
+        <h1 className="text-2xl font-semibold mb-4">Search</h1>
 
-//         <input
-//           type="text"
-//           placeholder="Search..."
-//           value={query}
-//           onChange={(e) => setQuery(e.target.value)}
-//           onKeyDown={onKeyDown}
-//           className="w-full border text-black border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
-//         />
+        <input
+          type="text"
+          placeholder="Search..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={onKeyDown}
+          className="w-full border text-black border-gray-300 rounded-lg px-4 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
 
-//         <div className="flex gap-3 mb-6">
-//           <FilterButton label="Game" active={filter === 'game'} onClick={() => setFilter('game')} />
-//           <FilterButton label="User" active={filter === 'user'} onClick={() => setFilter('user')} />
-//           <FilterButton label="Forum" active={filter === 'forum'} onClick={() => setFilter('forum')} />
-//         </div>
+        <div className="flex gap-3 mb-6">
+          <FilterButton label="Game" active={filter === 'game'} onClick={() => setFilter('game')} />
+          <FilterButton label="User" active={filter === 'user'} onClick={() => setFilter('user')} />
+          <FilterButton label="Forum" active={filter === 'forum'} onClick={() => setFilter('forum')} />
+        </div>
 
-//         <p className="mb-2 font-medium">
-//           {filter === 'game' && 'Game Result:'}
-//           {filter === 'user' && 'User Result:'}
-//           {filter === 'forum' && 'Forum Result:'}
-//         </p>
+        <p className="mb-2 font-medium">
+          {filter === 'game' && 'Game Result:'}
+          {filter === 'user' && 'User Result:'}
+          {filter === 'forum' && 'Forum Result:'}
+        </p>
 
-//         {/* GAME */}
-//         {filter === 'game' && <GameGrid games={games} />}
+        {/* GAME */}
+        {filter === 'game' && <GameGrid games={games} />}
 
-// <<<<<<< feature/update-1
-//         {/* USER */}
-//         {filter === 'user' && (
-//           <div className="space-y-4">
-//             {users.map((user) => (
-//               <UserCard key={user.id} user={user} />
-//             ))}
-//           </div>
-//         )}
-// =======
-//       {/* USER */}
-//       {filter === 'user' && (
-//         <div className="space-y-4">
-//           {users.map((user) => (
-//             <UserCard key={user.id} user={user} />
-//           ))}
-//         </div>
-//       )}
+        {/* USER */}
+        {filter === 'user' && (
+          <div className="space-y-4">
+            {users.map((user) => (
+              <UserCard key={user.id} user={user} />
+            ))}
+          </div>
+        )}
 
-//       {/* FORUM */}
-// {filter === 'forum' && (
-//   <div className="space-y-4">
-//     {games.map((game) => (
-//       <Link
-//         key={game.igdb_id}
-//         href={{
-//           pathname: '/forum/[slug]',
-//           query: { slug: game.slug, threadId: game.igdb_id },
-//         }}
-//         className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4"
-//       >
-//         <img
-//           src={game.cover || 'https://via.placeholder.com/264x374?text=No+Image'}
-//           alt={game.name}
-//           className="w-16 h-24 object-cover"
-//         />
-//         <div className="px-4 py-2">
-//           <h3 className="text-white text-base font-semibold">{game.name}</h3>
-//           {/* <p className="text-gray-400 text-sm">{game. || 'Unknown Year'}</p> */}
-//         </div>
-//       </Link>
-//     ))}
-//   </div>
-// )}
-// >>>>>>> development
+        {/* FORUM */}
+        {filter === 'forum' && (
+          <div className="space-y-4">
+            {games.map((game) => (
+              <Link
+                key={game.igdb_id}
+                href={{
+                  pathname: '/forum/[slug]',
+                  query: { slug: game.slug, threadId: game.igdb_id },
+                }}
+                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4"
+              >
+                <img
+                  src={game.cover || 'https://via.placeholder.com/264x374?text=No+Image'}
+                  alt={game.name}
+                  className="w-16 h-24 object-cover"
+                />
+                <div className="px-4 py-2">
+                  <h3 className="text-white text-base font-semibold">{game.name}</h3>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
-//         {/* FORUM */}
-//         {filter === 'forum' && (
-//           <div className="space-y-4">
-//             {games.map((game) => (
-//               <Link
-//                 key={game.igdb_id}
-//                 href={{
-//                   pathname: '/forum/[slug]',
-//                   query: { slug: game.slug, threadId: game.igdb_id },
-//                 }}
-//                 className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4"
-//               >
-//                 <img
-//                   src={game.cover || 'https://via.placeholder.com/264x374?text=No+Image'}
-//                   alt={game.name}
-//                   className="w-16 h-24 object-cover"
-//                 />
-//                 <div className="px-4 py-2">
-//                   <h3 className="text-white text-base font-semibold">{game.name}</h3>
-//                 </div>
-//               </Link>
-//             ))}
-//           </div>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default SearchPage;
-
+export default SearchPage;
