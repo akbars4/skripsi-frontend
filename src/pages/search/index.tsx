@@ -95,7 +95,7 @@ const SearchPage: NextPage = () => {
         className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4"
       >
         <img
-          src={game.cover_url || 'https://via.placeholder.com/264x374?text=No+Image'}
+          src={game.cover || 'https://via.placeholder.com/264x374?text=No+Image'}
           alt={game.name}
           className="w-16 h-24 object-cover"
         />
