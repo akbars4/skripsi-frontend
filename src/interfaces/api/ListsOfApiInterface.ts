@@ -80,7 +80,7 @@ export interface GameLocal {
 
 export interface UserList {
   id: number;
-  title: string;
+  name: string;
   slug: string;
   description: string;
   // games: GameLocal[];
@@ -160,7 +160,7 @@ export interface ProfileResponse {
     igdb_id: number
     name: string
     slug?: string
-    cover_url: string
+    cover: string
   }[]
   // kalau ada properti lain (misal lists), tambahkan juga di sini
 }
@@ -272,3 +272,28 @@ export interface DiaryComment {
     profile_picture_url: string | null;
   };
 }
+
+export interface WishlistItem {
+  game_list_id: number;
+  game_local_id: number;
+  igdb_id: number;
+  name: string;
+  cover_url: string;
+  first_release_year: string;
+}
+
+export interface GameList {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+  games_count?: number;
+  created_at: string;
+  updated_at: string;
+  items: {
+    game: {
+      igdb_id: number;
+    };
+  }[];
+}
+
