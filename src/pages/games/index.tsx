@@ -47,7 +47,7 @@ export default function GameIndex({
 }: ExploreProps) {
   return (
     <div className="min-h-screen bg-[#11161D] text-white px-4 py-6">
-      <h1 className="text-2xl font-bold mb-6">All Games</h1>
+      <h1 className="text-2xl font-bold mb-6">Games</h1>
 
       <GameGrid games={games} />
 
