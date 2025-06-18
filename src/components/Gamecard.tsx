@@ -17,7 +17,7 @@ export default function GameCard({ slug, name, cover, href, game }: GameCardProp
   }
   return (
     <Link href={href} prefetch={false} className="block group">
-      <div className="aspect-[4/5] w-full rounded-md overflow-hidden transform transition-transform duration-200 group-hover:scale-105">
+      <div className="aspect-[3/4] w-full rounded-md overflow-hidden transform transition-transform duration-200 group-hover:scale-105">
         <Image
           src={cover}
           alt={name}

@@ -1,7 +1,7 @@
 //  --------------------- api login user -------------------------------
 // lib/api.ts
 
-import { ActivityDetail, CreateDiaryBody, CreateListBody, CreateThreadBody, DiaryComment, DiaryDetail, DiaryEntry, FetchForumThreadsBySlugOpts, FollowerUser, FollowingUser, ForumThread, LoginResponse, ProfileResponse, Reply, UserList } from "@/interfaces/api/ListsOfApiInterface";
+import { ActivityDetail, CreateDiaryBody, CreateListBody, CreateThreadBody, DiaryComment, DiaryDetail, DiaryEntry, FetchForumThreadsBySlugOpts, FollowerUser, FollowingUser, ForumThread, GameList, LoginResponse, ProfileResponse, Reply, UserList } from "@/interfaces/api/ListsOfApiInterface";
 import { Game } from "@/interfaces/Game";
 
 
@@ -166,58 +166,75 @@ export async function logout() {
 // api game detail
 // ------------------------------- api button to add game to gamelist ----------------------------
 // ([pages/game/[slug]/index.tsx])
-export async function addToGameList(slug: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  const apiKey = process.env.NEXT_PUBLIC_API_KEY;
-  const res = await fetch(`${baseUrl}/api/lists/${slug}/custom`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "X-API-KEY": apiKey || "",
-    },
-  });
-  if (!res.ok) throw new Error("Gagal menambahkan ke gamelist");
+export async function addGameToList(slug: string, igdbId: number, token: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/lists/${slug}/custom`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        "X-API-KEY": process.env.NEXT_PUBLIC_API_KEY || "",
+      },
+      body: JSON.stringify({ igdb_id: igdbId }),
+    }
+  );
+
+  if (!res.ok) throw new Error("Failed to add game to list");
+  return await res.json();
 }
 
 // ------------------------ api buat button add to favourites --------------------
 // ([slug]/index.tsx)
+// ✅ Ambil daftar semua favorit user
+export async function fetchFavorites(username: string, token: string) {
+  const res = await fetch(`${baseUrl}/api/user/${username}/favorites`, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "X-API-KEY": apiKey || "",
+    },
+  });
+
+  if (!res.ok) throw new Error("Failed to fetch favorites");
+  const json = await res.json();
+  return json.data as { igdb_id: number }[];
+}
+
+// ✅ Tambah game ke favorite
 export async function addToFavorites(igdb_id: number, token: string) {
-  const url = `${baseUrl}/api/lists/add-to-favorites`;
-  const res = await fetch(url, {
+  const res = await fetch(`${baseUrl}/api/lists/add-to-favorites`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "X-API-KEY": apiKey || "",
-      // Jika backend memeriksa Bearer token, gunakan:
       "Authorization": `Bearer ${token}`,
+      "X-API-KEY": apiKey || "",
     },
-    credentials: "include", // jika backend menggunakan cookie/session
     body: JSON.stringify({ igdb_id }),
   });
 
   if (!res.ok) {
-    // Contoh: jika batas 4 game terlampaui atau error lain,
-    // bisa throw error dengan pesan dari response
-    let errMsg = `Failed to add to favorites (status ${res.status})`;
-    try {
-      const errJson = await res.json();
-      if (errJson?.message) errMsg = errJson.message;
-    } catch (e) {
-      // nothing
-    }
-    throw new Error(errMsg);
+    const msg = await res.text();
+    throw new Error(msg);
   }
-
-  const json = await res.json();
-  // response example:
-  // {
-  //   "code":200,
-  //   "status":"OK",
-  //   "message":"Game added to favorites.",
-  //   "data": { "game_list_id":1, "igdb_id":114283, "name":"Persona 5 Royal" }
-  // }
-  return json.data;
+  return await res.json();
 }
+
+// ✅ Hapus game dari favorite
+export async function removeFromFavorites(igdb_id: number, token: string) {
+  const res = await fetch(`${baseUrl}/api/lists/remove-from-favorites/${igdb_id}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "X-API-KEY": apiKey || "",
+    },
+  });
+
+  if (!res.ok) throw new Error("Failed to remove favorite");
+  return await res.json();
+}
+
+
+
 
 // ---------------------------- api button add to review --------------------
 // ([slug]/index.tsx)
@@ -242,19 +259,63 @@ export async function createDiaryEntry(body: CreateDiaryBody, token: string) {
 }
 
 // ------------------------- api button add to want to play ---------------------
-// ([slug]/index.tsx)
-export async function addToWantToPlay(slug: string) {
-  //     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  //   const apiKey = process.env.NEXT_PUBLIC_API_KEY;
-  //   const res = await fetch(`${baseUrl}/api/want-to-play/add/${slug}`, {
-  //      method: "POST",
-  //     credentials: "include",
-  //     headers: {
-  //         "X-API-KEY": apiKey || "",
-  //     }
-  //     });
-  //   if (!res.ok) throw new Error("Gagal menambahkan ke want-to-play");
+// wishlist
+export async function fetchUserWishlist(username: string, token: string) {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/${encodeURIComponent(username)}/want-to-play`,
+    {
+      headers: {
+        "X-API-KEY": apiKey || "",
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch wishlist (${res.status})`);
+  }
+
+  const json = await res.json();
+  return json.data;
 }
+
+export async function addToWantToPlay(igdb_id: number, token: string) {
+  const res = await fetch(`${baseUrl}/api/lists/add-want-to-play`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      "X-API-KEY": apiKey || "",
+    },
+    body: JSON.stringify({ igdb_id }),
+  });
+
+  if (!res.ok) {
+    const msg = await res.text();
+    throw new Error(msg);
+  }
+
+  return await res.json();
+}
+
+export async function removeFromWantToPlay(igdb_id: number, token: string) {
+  const res = await fetch(`${baseUrl}/api/lists/remove-from-wishlist/${igdb_id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "X-API-KEY": apiKey || "",
+    },
+  });
+
+  if (!res.ok) {
+    const msg = await res.text();
+    throw new Error(msg);
+  }
+
+  return await res.json();
+}
+
 
 // ---------------------------- api game detail---------------------------------
 // ([slug]/index.tsx)
@@ -473,11 +534,25 @@ export async function fetchUserLists(username: string, token: string): Promise<U
     headers: {
       "X-API-KEY": apiKey || "",
       Authorization: `Bearer ${token}`,
+      Accept: "application/json",
     },
   });
   if (!res.ok) throw new Error("Failed to load lists");
   const json = await res.json();
   return json.data as UserList[];
+}
+
+export async function fetchUserListsGame(username: string, token: string): Promise<GameList[]> {
+  const res = await fetch(`${baseUrl}/api/user/${encodeURIComponent(username)}/lists`, {
+    headers: {
+      "X-API-KEY": apiKey || "",
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+  });
+  if (!res.ok) throw new Error("Failed to load lists");
+  const json = await res.json();
+  return json.data as GameList[];
 }
 
 // create a new list
@@ -513,6 +588,48 @@ export async function fetchUserListDetail(username: string, slug: string, token:
   });
   const json = await res.json();
   return json.data;
+}
+
+// update list
+export async function updateUserList(
+  slug: string,
+  body: { name: string; description: string },
+  token: string
+): Promise<UserList> {
+  const res = await fetch(`${baseUrl}/api/lists/${encodeURIComponent(slug)}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "X-API-KEY": apiKey || "",
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.message || `Failed to update list (${res.status})`);
+  }
+
+  const json = await res.json();
+  return json.data;
+}
+
+// delete list
+export async function deleteUserList(slug: string, token: string): Promise<void> {
+  const res = await fetch(`${baseUrl}/api/lists/${encodeURIComponent(slug)}`, {
+    method: "DELETE",
+    headers: {
+      "X-API-KEY": apiKey || "",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.message || "Failed to delete list");
+  }
 }
 
 
