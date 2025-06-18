@@ -7,7 +7,7 @@ const UserCard: React.FC<{ user: ProfileResponse }> = ({ user }) => (
     <div className="flex items-center space-x-4 p-3 bg-transparent rounded-lg hover:bg-[#1b2a3d] gap-5">
       <div className='rounded-full bg-slate-200'>
       <img
-        src={user.profile_picture_url}
+        src={user.profile_picture_url ?? "/default-profile.png"}
         alt={user.username}
         className="w-12 h-12 rounded-full"
       />

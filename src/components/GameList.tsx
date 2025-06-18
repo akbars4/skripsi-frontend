@@ -17,6 +17,7 @@ export default function GameList({ games }: GameListProps) {
                   name={game.name}
                   cover={game.cover}
                   href={`/games/${game.slug}`} // Construct href here, or use a base path prop
+                  game={game}
                 />
           </div>
         ))}
