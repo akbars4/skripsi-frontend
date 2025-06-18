@@ -21,7 +21,7 @@ export default function GameGrid({
           name={game.name}
           cover={game.cover}
           href={`${hrefPrefix}/${game.slug}`}
-          game={game}
+          game={game} // ✅ ini yang hilang dan bikin error
         />
       ))}
     </div>
